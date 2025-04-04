@@ -1,0 +1,11 @@
+# Database Connectors
+pymongo==4.6.1
+mysql-connector-python==8.3.0
+psycopg2==2.9.9
+redis==5.0.1
+elasticsearch==8.12.0
+cx-Oracle==8.3.0
+oracledb==2.0.0
+
+# Utilities
+tabulate==0.9.0

@@ -1,0 +1,118 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.1.11
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodata:/data/db
+      - ./mongodb-init.js:/docker-entrypoint-initdb.d/mongodb-init.js
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.1.12
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: my_database
+    volumes:
+      - mysqldata.var/lib/mysql
+      - ./mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql
+
+  postgresql:
+    image: postgres:latest
+    container_name: postgresql
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.1.13
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: my_database
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.1.14
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+      - ./redis-init.sh:/data/redis/redis-init.sh
+      - ./redis-entrypoint.sh:/data/redis-entrypoint.sh
+    entrypoint: ["sh", "/data/redis-entrypoint.sh"]
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: elasticsearch
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.1.15
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - network.host=0.0.0.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+      - ./bulk_data.json:/usr/share/elasticsearch/config/bulk_data.json
+      - ./custom-entrypoint.sh:/custom-entrypoint.sh
+    entrypoint: ["/bin/bash", "/custom-entrypoint.sh"]
+
+  oracle:
+    container_name: oracle_db
+    image: gvenzl/oracle-free:23-slim
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_RANDOM_PASSWORD=yes
+      - APP_USER=my_database
+      - APP_USER_PASSWORD=my_password
+      - ORACLE_DATABASE=MYDB        # This creates PDB named MYDB
+      - INIT_PDB=true
+    volumes:
+      - ./init-scripts:/container-entrypoint-initdb.d
+    networks:
+      mynetwork:
+        ipv4_address: 192.168.1.16
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  mongodata:
+  mysqldata:
+  pgdata:
+  redisdata:
+  esdata:
+    
+networks:
+  mynetwork:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24
+
