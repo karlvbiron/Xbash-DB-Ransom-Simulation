@@ -25,8 +25,8 @@ This repository builds upon the insights presented in the technical article [The
 1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/yourusername/xbash-simulation.git
-   cd xbash-simulation
+   git clone https://github.com/karlvbiron/Xbash-DB-Ransom-Simulation.git
+   cd Xbash-DB-Ransom-Simulation
    ```
 
 2. **Set Up the Environment**:
